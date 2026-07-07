@@ -10,7 +10,7 @@ def initialize_vector_db():
     """初始化向量数据库，灌入模拟数据"""
     # 1. 初始化嵌入模型
     embeddings = HuggingFaceEmbeddings(
-        model_name=r"B:\MySoftwarework\Python\MyCode\CAS\competitor-analysis-system\models\bge-m3",
+        model_name="../models/bge-m3",
         model_kwargs={"device": "cpu"},
         encode_kwargs={"normalize_embeddings": True},
     )
