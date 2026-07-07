@@ -1,16 +1,38 @@
-# 这是一个示例 Python 脚本。
+# main.py
+import os
+from dotenv import load_dotenv
 
-# 按 Shift+F10 执行或将其替换为您的代码。
-# 按 双击 Shift 在所有地方搜索类、文件、工具窗口、操作和设置。
+# 加载根目录 .env 环境变量（密钥全程隐式读取，代码不出现明文）
+load_dotenv()
+
+# 导入模块内的功能函数
+from modules.rag_chain import build_rag_chain
+from modules.data_loader import init_and_fill_vector_db
 
 
-def print_hi(name):
-    # 在下面的代码行中使用断点来调试脚本。
-    print(f'Hi, {name}')  # 按 Ctrl+F8 切换断点。
+def main():
+    # 向量库统一存放在项目根目录
+    vector_db_path = "./chroma_db"
+
+    # 自动检测：没有向量库就先执行灌库，不用单独跑 data_loader
+    if not os.path.exists(vector_db_path):
+        print("⚠️  未检测到向量库，开始执行灌库...")
+        init_and_fill_vector_db(persist_dir=vector_db_path)
+
+    # 构建完整 RAG 查询链路
+    print("\n🚀 正在构建RAG查询链路...")
+    rag_chain = build_rag_chain(persist_dir=vector_db_path)
+
+    # 执行测试查询
+    query = "竞品A最近有什么价格变动？"
+    print(f"\n🔍 查询问题：{query}")
+    print("⏳ 正在生成结果...")
+
+    result = rag_chain.invoke(query)
+
+    print("\n✅ 查询完成，结构化结果如下：")
+    print(result)
 
 
-# 按装订区域中的绿色按钮以运行脚本。
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# 访问 https://www.jetbrains.com/help/pycharm/ 获取 PyCharm 帮助
+if __name__ == "__main__":
+    main()
