@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # 导入模块内的功能函数
-from modules.rag_chain import build_rag_chain
+from modules.rag_chain import build_rag_chain, format_output
 from modules.data_loader import init_and_fill_vector_db
 
 
@@ -31,7 +31,7 @@ def main():
     result = rag_chain.invoke(query)
 
     print("\n✅ 查询完成，结构化结果如下：")
-    print(result)
+    format_output(result)
 
 
 if __name__ == "__main__":

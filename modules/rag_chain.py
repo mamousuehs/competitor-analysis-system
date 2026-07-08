@@ -8,20 +8,14 @@ from langchain_chroma import Chroma
 from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 from dotenv import load_dotenv
 from langchain_core.runnables import RunnableLambda
+from modules.llm_client import get_deepseek_llm
 
 env_path = "../.env"
 load_dotenv(dotenv_path=env_path)
 
 api_key = os.environ.get("DEEPSEEK_API_KEY")
 
-# 初始化 LLM
-LLM = ChatOpenAI(
-    model="deepseek-chat",
-    openai_api_key=api_key,
-    base_url="https://api.deepseek.com/v1",
-    temperature=0.0,
-    timeout=30,
-)
+LLM = None
 
 # 提示词 + 解析器
 parser = JsonOutputParser()
@@ -63,11 +57,11 @@ prompt = PromptTemplate(
 )
 
 
-def build_rag_chain():
+def build_rag_chain(persist_dir="./chroma_db", model_path="./models/bge-m3"):
     """延迟加载嵌入模型和向量库"""
     print("开始加载嵌入模型...")
     embeddings = HuggingFaceEmbeddings(
-        model_name="../models/bge-m3",
+        model_name=str(model_path),
         model_kwargs={"device": "cpu"},
         encode_kwargs={"normalize_embeddings": True},
     )
@@ -75,7 +69,7 @@ def build_rag_chain():
 
     print("加载向量数据库...")
     vector_db = Chroma(
-        persist_directory="./chroma_db",
+        persist_directory=str(persist_dir),
         embedding_function=embeddings,
     )
     retriever = vector_db.as_retriever(search_kwargs={"k": 4})
@@ -87,7 +81,7 @@ def build_rag_chain():
                 "context": retriever | RunnableLambda(lambda docs: "\n".join(doc.page_content for doc in docs))
             }
             | prompt
-            | LLM
+            | get_deepseek_llm()
             | parser
     )
 
@@ -148,7 +142,8 @@ def format_output(result):
 
     print(f"\n{'=' * 70}")
 
-    with open('../output/price_intelligence.json', 'w', encoding='utf-8') as f:
+    os.makedirs('output', exist_ok=True)
+    with open('output/price_intelligence.json', 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
     print(f"  ✅ 完整报告已保存至: price_intelligence.json")
     print(f"{'=' * 70}\n")

@@ -1,6 +1,12 @@
 python-dotenv
+langchain
 langchain-openai
 langchain-chroma
 langchain-huggingface
 langchain-text-splitters
 langchain-core
+pandas
+requests
+beautifulsoup4
+fastapi
+uvicorn

@@ -6,6 +6,10 @@ output
 output/
 output/*
 
+plan
+plan/
+plan/*
+
 .env
 chroma_db/
 
